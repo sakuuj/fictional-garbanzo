@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-patients-table
+      author: Pavel
+      sqlFile:
+        path: db/migrations/sql/table-patients.sql

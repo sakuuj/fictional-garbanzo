@@ -1,0 +1,86 @@
+x-common: &common
+  env_file: .env
+  restart: unless-stopped
+  networks:
+    - net
+
+x-common-pg:
+  environment: &common-pg-env
+    POSTGRES_USER: ${POSTGRES_USERNAME}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+
+name: agsr
+
+services:
+  app:
+    <<: *common
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    depends_on:
+      dbms:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      <<: *common-pg-env
+      TOMCAT_MAX_THREADS: 1 # As we are using virtual threads, we do not need a lot of platform threads
+      KEYCLOAK_PORT: ${KEYCLOAK_PORT}
+      KEYCLOAK_HOST: ${KEYCLOAK_HOST}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1gb
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  dbms:
+    <<: *common
+    image: postgres:16.8-alpine3.20
+    environment:
+      <<: *common-pg-env
+      PGUSER: ${POSTGRES_USERNAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 1gb
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  keycloak:
+    <<: *common
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile-keycloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
+      KC_HEALTH_ENABLED: true
+      KC_HTTP_PORT: ${KEYCLOAK_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/health/ready | grep '\"status\": \"UP\"'"]
+      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1gb
+    ports:
+      - "127.0.0.1:8081:8081"
+
+networks:
+  net:

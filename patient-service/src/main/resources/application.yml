@@ -1,0 +1,32 @@
+server.port: 8080
+server.tomcat:
+  threads.max: ${TOMCAT_MAX_THREADS}
+
+spring.threads.virtual.enabled: true
+
+spring.datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+spring.security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            clientId: ${KEYCLOAK_CLIENT_ID}
+            clientSecret: ${KEYCLOAK_CLIENT_SECRET}
+            authorizationGrantType: password
+        provider:
+          keycloak:
+            userNameAttribute: preferred_username
+            issuerUri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/${KEYCLOAK_REALM}
+
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/${KEYCLOAK_REALM}
+spring.liquibase:
+  change-log: classpath:db/migrations/changelog-root.yml
+
+
+logging.level:
+  org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG

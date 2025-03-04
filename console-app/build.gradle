@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+group = 'by.sakuuj'
+version = '1.0-SNAPSHOT'
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "by.sakuuj.agsr.Runner"
+    }
+
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor platform(project(":bom"))
+    annotationProcessor("org.projectlombok:lombok")
+
+    implementation platform(project(":bom"))
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation 'org.instancio:instancio-core:5.4.0'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3'
+
+    compileOnly("org.projectlombok:lombok")
+
+}
+
+test {
+    useJUnitPlatform()
+}
