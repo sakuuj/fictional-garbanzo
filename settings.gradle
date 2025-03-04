@@ -1,0 +1,5 @@
+rootProject.name = 'oagsr'
+include 'bom'
+include 'patient-service'
+include 'console-app'
+
