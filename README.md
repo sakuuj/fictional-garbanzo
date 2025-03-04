@@ -40,3 +40,8 @@ Credentials:
 ```bash
 /bin/bash -c "./gradlew :console-app:jar" && /bin/bash -c "java -jar console-app/build/libs/console-app-1.0-SNAPSHOT.jar -u andrew_practitioner -p 1"
 ```
+
+### Postman
+В постман запросах, требующих переменную id, необходимо её задать, подставив нужное значение в pre-request script. 
+
+Access token выставляется автоматически после вызова /login эндпоинта.
