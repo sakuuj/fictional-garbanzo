@@ -12,5 +12,4 @@ WORKDIR /app
 ARG SERVICE_NAME="patient-service"
 ARG SERVICE_VERSION="1.0-SNAPSHOT.jar"
 COPY --from=builder /app/${SERVICE_NAME}/build/libs/${SERVICE_NAME}-${SERVICE_VERSION} ./app.jar
-COPY /$SERVICE_NAME/build/libs/${SERVICE_NAME}-${SERVICE_VERSION} ./app.jar
 ENTRYPOINT ["/bin/sh", "-c", "java ${JAVA_OPTS} -jar ./app.jar"]
